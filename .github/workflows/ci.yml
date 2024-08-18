@@ -18,9 +18,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+        
+      # Move to the subdirectory where your package.json is located
+      - name: Change directory to my-flask-app/packge.json
+        working-directory: ./my-flask-app/packge.json
+        run: ls -la  # Optional: list the files to verify package.json exists
 
       - name: Install dependencies
+        working-directory: ./my-flask-app
         run: npm install
 
       - name: Run tests
+        working-directory: ./my-flask-app
         run: npm test
