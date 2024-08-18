@@ -1,32 +1,26 @@
-name: CI Pipeline
+name: Node.js CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build
-        run: npm install  # Example build step
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
 
-      - name: Test
-        run: npm test  # Example test step
-
-  deploy:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Deploy
-        run: ./deploy.sh  # Example deploy step
+      - name: Run tests
+        run: npm test
