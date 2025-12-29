@@ -18,9 +18,8 @@ stages:
   - job: Build
     displayName: Build
     pool:
-    name: Default
-    demands:
-    - Agent.Name -equals windows-agent-01
+      name: Default
+    
     steps:
     - task: Docker@2
       displayName: Build an image
