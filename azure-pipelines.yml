@@ -7,38 +7,34 @@ pool:
   - Agent.Name -equals windows-agent-01
 
 variables:
-  FLASK_PORT: "5000"
+  FLASK_PORT: '5000'
 
 steps:
 - checkout: self
   fetchDepth: 1
 
-# 1) Verify Python exists on the agent
 - powershell: |
-    Write-Host "=== Python check ==="
-    where python
-    python --version
+    Write-Host '=== Python check ==='
+    where py
     py -V
-  displayName: "Check Python on agent"
+    py -0p
+  displayName: 'Check Python on agent'
 
-# 2) Install dependencies
 - powershell: |
-    Write-Host "=== Install dependencies ==="
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: "Install dependencies"
+    Write-Host '=== Install dependencies ==='
+    py -m pip install --upgrade pip
+    py -m pip install -r requirements.txt
+  displayName: 'Install dependencies'
 
-# 3) Smoke test: start Flask, curl locally, then stop
 - powershell: |
-    Write-Host "=== Smoke test (local) ==="
+    Write-Host '=== Smoke test (local) ==='
+    $env:PORT = '$(FLASK_PORT)'
 
-    $env:PORT = "$(FLASK_PORT)"
-
-    $p = Start-Process -PassThru -NoNewWindow -FilePath "python" -ArgumentList "app.py"
+    $p = Start-Process -PassThru -NoNewWindow -FilePath 'py' -ArgumentList 'app.py'
     Start-Sleep -Seconds 8
 
-    Write-Host "Calling http://127.0.0.1:$env:PORT/"
-    curl "http://127.0.0.1:$env:PORT/" | Select-Object -First 50
+    Write-Host 'Calling http://127.0.0.1:' $env:PORT '/'
+    curl ("http://127.0.0.1:{0}/" -f $env:PORT) | Select-Object -First 50
 
     Stop-Process -Id $p.Id -Force
-  displayName: "Smoke test (local)"
+  displayName: 'Smoke test (local)'
