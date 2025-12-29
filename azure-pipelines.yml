@@ -28,18 +28,10 @@ steps:
     pip install -r requirements.txt
   displayName: "Install dependencies"
 
-# 3) (Optional) Run tests - enable if you have tests/pytest
-# - powershell: |
-#     pip install pytest
-#     pytest -q
-#   displayName: "Run tests"
-
-# 4) Smoke test: start Flask, curl locally, then stop
+# 3) Smoke test: start Flask, curl locally, then stop
 - powershell: |
     Write-Host "=== Smoke test (local) ==="
 
-    # Start Flask in background
-    $env:FLASK_ENV = "production"
     $env:PORT = "$(FLASK_PORT)"
 
     $p = Start-Process -PassThru -NoNewWindow -FilePath "python" -ArgumentList "app.py"
@@ -48,6 +40,5 @@ steps:
     Write-Host "Calling http://127.0.0.1:$env:PORT/"
     curl "http://127.0.0.1:$env:PORT/" | Select-Object -First 50
 
-    # Stop Flask
     Stop-Process -Id $p.Id -Force
   displayName: "Smoke test (local)"
