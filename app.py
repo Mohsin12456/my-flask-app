@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 
 app = Flask(__name__)
 
@@ -13,11 +14,12 @@ def home():
         <title>My Flask App</title>
     </head>
     <body>
-        <h1>Hello, Docker!</h1>
-        <p>Welcome to my Flask application running in a Docker container.</p>
+        <h1>Hello, Flask!</h1>
+        <p>Welcome to my Flask application.</p>
     </body>
     </html>
     """
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
