@@ -13,46 +13,59 @@ steps:
 - checkout: self
   fetchDepth: 1
 
-# Proof step (so you can confirm YAML is being executed)
+# PROOF step: confirms YAML is running
 - powershell: |
-    Write-Host 'PROOF: YAML steps are running'
-    Write-Host 'Repo:' "$(Build.Repository.Name)"
-    Write-Host 'Branch:' "$(Build.SourceBranch)"
+    Write-Host "PROOF: YAML is running"
+    Write-Host "Repo: $(Build.Repository.Name)"
+    Write-Host "Branch: $(Build.SourceBranch)"
+    Write-Host "Agent: $(Agent.Name)"
   displayName: 'Proof step'
 
-# 1) Check Python available on self-hosted Windows agent
+# Python diagnostics: shows exactly what the agent can see
 - powershell: |
-    Write-Host '=== Python check ==='
+    Write-Host "=== Python check (detailed) ==="
+    Write-Host "`nWhoAmI:"
+    whoami
+
+    Write-Host "`nMachine:"
+    hostname
+
+    Write-Host "`nPATH:"
+    Write-Host $env:PATH
+
+    Write-Host "`n--- where py ---"
     where py
+
+    Write-Host "`n--- py -V ---"
     py -V
+
+    Write-Host "`n--- py -0p (installed pythons) ---"
     py -0p
+
+    Write-Host "`n--- where python ---"
+    where python
+
+    Write-Host "`n--- python --version ---"
+    python --version
   displayName: 'Check Python on agent'
 
-# 2) Install dependencies
+# Install dependencies (uses py launcher)
 - powershell: |
-    Write-Host '=== Install dependencies ==='
+    Write-Host "=== Install dependencies ==="
     py -m pip install --upgrade pip
     py -m pip install -r requirements.txt
   displayName: 'Install dependencies'
 
-# 3) Optional tests (enable if you have tests)
-# - powershell: |
-#     Write-Host '=== Run tests ==='
-#     py -m pip install pytest
-#     py -m pytest -q
-#   displayName: 'Run tests'
-
-# 4) Smoke test: start Flask, call locally, stop
+# Smoke test: start Flask, call locally, stop
 - powershell: |
-    Write-Host '=== Smoke test (local) ==='
-
+    Write-Host "=== Smoke test (local) ==="
     $env:PORT = '$(FLASK_PORT)'
 
     # Start Flask
-    $p = Start-Process -PassThru -NoNewWindow -FilePath 'py' -ArgumentList 'app.py'
+    $p = Start-Process -PassThru -NoNewWindow -FilePath "py" -ArgumentList "app.py"
     Start-Sleep -Seconds 8
 
-    # Call locally (adjust path if your app isn't on /)
+    # Call locally
     $url = ("http://127.0.0.1:{0}/" -f $env:PORT)
     Write-Host "Calling $url"
     curl $url | Select-Object -First 50
