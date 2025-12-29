@@ -14,7 +14,7 @@ steps:
   fetchDepth: 1
 
 - powershell: |
-    Write-Host "=== Proof / Agent info ==="
+    Write-Host "PROOF: YAML is running"
     Write-Host "Agent: $(Agent.Name)"
     Write-Host "Repo: $(Build.Repository.Name)"
     Write-Host "Branch: $(Build.SourceBranch)"
@@ -39,13 +39,33 @@ steps:
 
     # Start Flask
     $p = Start-Process -PassThru -NoNewWindow -FilePath "py" -ArgumentList "app.py"
-    Start-Sleep -Seconds 8
+    Write-Host "Started Flask PID: $($p.Id)"
+    Start-Sleep -Seconds 3
 
-    # Call locally
     $url = ("http://127.0.0.1:{0}/" -f $env:PORT)
     Write-Host "Calling $url"
-    curl $url | Select-Object -First 50
 
-    # Stop Flask
-    Stop-Process -Id $p.Id -Force
+    $ok = $false
+    try {
+      for ($i=1; $i -le 10; $i++) {
+        try {
+          $resp = curl $url
+          Write-Host ($resp | Select-Object -First 50)
+          $ok = $true
+          break
+        } catch {
+          Write-Host "Attempt $i failed, retrying..."
+          Start-Sleep -Seconds 2
+        }
+      }
+    } finally {
+      # Always stop Flask
+      if ($p -and !$p.HasExited) {
+        Stop-Process -Id $p.Id -Force
+      }
+    }
+
+    if (-not $ok) {
+      throw "Smoke test failed: could not reach $url"
+    }
   displayName: 'Smoke test (local)'
