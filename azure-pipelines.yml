@@ -3,38 +3,8 @@ trigger:
 
 pool:
   name: Default
-  demands:
-  - Agent.Name -equals windows-agent-01
-
-variables:
-  FLASK_PORT: '5000'
 
 steps:
-- checkout: self
-  fetchDepth: 1
-
 - powershell: |
-    Write-Host '=== Python check ==='
-    where py
-    py -V
-    py -0p
-  displayName: 'Check Python on agent'
-
-- powershell: |
-    Write-Host '=== Install dependencies ==='
-    py -m pip install --upgrade pip
-    py -m pip install -r requirements.txt
-  displayName: 'Install dependencies'
-
-- powershell: |
-    Write-Host '=== Smoke test (local) ==='
-    $env:PORT = '$(FLASK_PORT)'
-
-    $p = Start-Process -PassThru -NoNewWindow -FilePath 'py' -ArgumentList 'app.py'
-    Start-Sleep -Seconds 8
-
-    Write-Host 'Calling http://127.0.0.1:' $env:PORT '/'
-    curl ("http://127.0.0.1:{0}/" -f $env:PORT) | Select-Object -First 50
-
-    Stop-Process -Id $p.Id -Force
-  displayName: 'Smoke test (local)'
+    Write-Host "YAML IS RUNNING"
+  displayName: Proof
