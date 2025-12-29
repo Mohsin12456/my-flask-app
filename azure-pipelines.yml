@@ -13,50 +13,26 @@ steps:
 - checkout: self
   fetchDepth: 1
 
-# PROOF step: confirms YAML is running
 - powershell: |
-    Write-Host "PROOF: YAML is running"
+    Write-Host "=== Proof / Agent info ==="
+    Write-Host "Agent: $(Agent.Name)"
     Write-Host "Repo: $(Build.Repository.Name)"
     Write-Host "Branch: $(Build.SourceBranch)"
-    Write-Host "Agent: $(Agent.Name)"
   displayName: 'Proof step'
 
-# Python diagnostics: shows exactly what the agent can see
 - powershell: |
-    Write-Host "=== Python check (detailed) ==="
-    Write-Host "`nWhoAmI:"
-    whoami
-
-    Write-Host "`nMachine:"
-    hostname
-
-    Write-Host "`nPATH:"
-    Write-Host $env:PATH
-
-    Write-Host "`n--- where py ---"
+    Write-Host "=== Python check (py launcher) ==="
     where py
-
-    Write-Host "`n--- py -V ---"
     py -V
-
-    Write-Host "`n--- py -0p (installed pythons) ---"
     py -0p
+  displayName: 'Check Python (py)'
 
-    Write-Host "`n--- where python ---"
-    where python
-
-    Write-Host "`n--- python --version ---"
-    python --version
-  displayName: 'Check Python on agent'
-
-# Install dependencies (uses py launcher)
 - powershell: |
     Write-Host "=== Install dependencies ==="
     py -m pip install --upgrade pip
     py -m pip install -r requirements.txt
   displayName: 'Install dependencies'
 
-# Smoke test: start Flask, call locally, stop
 - powershell: |
     Write-Host "=== Smoke test (local) ==="
     $env:PORT = '$(FLASK_PORT)'
